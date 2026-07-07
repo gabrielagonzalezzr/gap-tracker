@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>School meals gap tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #17160F;
+    --paper: #F7F5EE;
+    --paper-alt: #EEE9D8;
+    --muted: #6E6C61;
+    --green: #34633F;
+    --mustard: #B8860B;
+    --brick: #A23E2C;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Source Serif 4', Georgia, serif;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 0 0 48px; }
+  .eyebrow {
+    font-family: 'Archivo', sans-serif; font-weight: 700; letter-spacing: 0.14em;
+    text-transform: uppercase; font-size: 11px; color: var(--muted);
+  }
+  .num { font-family: 'Archivo', sans-serif; font-variant-numeric: tabular-nums; }
+  h1 {
+    font-family: 'Archivo', sans-serif; font-weight: 900; font-size: 34px;
+    line-height: 1.08; margin: 10px 0 12px; letter-spacing: -0.01em;
+  }
+  .lede { font-size: 16px; color: var(--muted); max-width: 620px; margin: 0; line-height: 1.6; }
+  .rule-thick { height: 6px; background: var(--ink); margin: 24px 0 0; }
+  .rule { height: 1px; background: var(--ink); }
+  .header { padding: 36px 32px 0; }
+  .section { padding: 0 32px; }
+  .thesis { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0; }
+  .thesis > div { padding: 0 20px 20px; }
+  .thesis > div + div { border-left: 1px solid var(--paper-alt); }
+  .thesis .label { margin-bottom: 8px; }
+  .thesis .body { font-size: 14.5px; line-height: 1.55; }
+  .score-row { display: flex; gap: 28px; align-items: flex-start; flex-wrap: wrap; }
+  .score-num { font-size: 56px; font-weight: 900; line-height: 1; }
+  .score-tag { font-family: 'Archivo', sans-serif; font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 6px; }
+  .score-sub { font-size: 11.5px; color: var(--muted); margin-top: 6px; }
+  .weight-row { margin-bottom: 10px; }
+  .weight-row .top { display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 3px; }
+  .weight-row .top span:first-child { font-family: 'Archivo', sans-serif; font-weight: 700; }
+  .weight-row .top span:last-child { color: var(--muted); }
+  input[type="range"] { width: 100%; }
+  .tabs { display: flex; gap: 24px; margin-bottom: 18px; }
+  .tabbtn {
+    font-family: 'Archivo', sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 0.04em;
+    text-transform: uppercase; background: none; border: none; cursor: pointer; padding: 10px 0;
+    border-bottom: 3px solid transparent; color: var(--muted);
+  }
+  .tabbtn.active { color: var(--ink); border-bottom: 3px solid var(--ink); }
+  .tabpanel { display: none; }
+  .tabpanel.active { display: block; }
+  .legend { display: flex; gap: 18px; margin-bottom: 14px; font-family: 'Archivo', sans-serif; font-size: 12px; }
+  .legend span { display: flex; align-items: center; gap: 6px; }
+  .swatch { width: 11px; height: 11px; display: inline-block; }
+  .chart { position: relative; height: 300px; display: flex; align-items: flex-end; gap: 14px; padding: 10px 4px 0; border-bottom: 1px solid var(--ink); }
+  .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; position: relative; cursor: default; }
+  .bar { width: 56px; border-radius: 3px 3px 0 0; position: relative; }
+  .bar-label { font-family: 'Archivo', sans-serif; font-size: 12px; font-weight: 700; margin-top: 8px; }
+  .bar-value { font-family: 'Archivo', sans-serif; font-size: 13px; font-weight: 900; margin-bottom: 6px; }
+  .avg-line { position: absolute; left: 0; right: 0; border-top: 1.5px dashed var(--mustard); }
+  .avg-label {
+    position: absolute; right: 0; top: -18px; font-family: 'Archivo', sans-serif; font-size: 11px;
+    font-weight: 700; color: var(--mustard); background: var(--paper); padding: 0 4px;
+  }
+  .tooltip {
+    display: none; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+    background: var(--paper); border: 1.5px solid var(--ink); padding: 10px 14px; font-family: 'Archivo', sans-serif;
+    width: 200px; text-align: left; z-index: 5; margin-bottom: 8px;
+  }
+  .bar-col:hover .tooltip { display: block; }
+  .tooltip .t-state { font-weight: 900; font-size: 13px; }
+  .tooltip .t-growth { font-size: 20px; font-weight: 900; font-variant-numeric: tabular-nums; }
+  .tooltip .t-sub { font-size: 11px; color: var(--muted); margin-top: 2px; line-height: 1.4; }
+  .tooltip .t-note { font-size: 11px; margin-top: 6px; border-top: 1px solid var(--paper-alt); padding-top: 6px; }
+  .caption { font-size: 12.5px; color: var(--muted); margin-top: 10px; line-height: 1.5; }
+  .stat-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px; }
+  .stat-card { background: var(--paper-alt); padding: 18px 20px; }
+  .stat-card .big { font-size: 40px; font-weight: 900; line-height: 1; }
+  .stat-card .desc { font-size: 13px; margin-top: 8px; line-height: 1.5; }
+  .mechanism { border-left: 3px solid var(--mustard); padding-left: 16px; margin-bottom: 22px; }
+  .mechanism p { font-size: 14.5px; line-height: 1.6; margin: 0; }
+  .fix-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .fix-card { padding: 14px 16px; border: 1px solid var(--paper-alt); }
+  .fix-card .t { font-family: 'Archivo', sans-serif; font-weight: 800; font-size: 13px; margin-bottom: 4px; }
+  .fix-card .d { font-size: 13px; color: var(--muted); line-height: 1.5; }
+  .stat-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 22px; }
+  .stat-grid-3 .big { font-size: 30px; font-weight: 900; }
+  .stat-grid-3 .desc { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+  .sources { font-size: 11.5px; color: var(--muted); line-height: 1.7; margin: 0; }
+  .footnote { font-size: 11.5px; color: var(--muted); line-height: 1.6; }
+  @media (max-width: 600px) {
+    .thesis { grid-template-columns: 1fr; }
+    .thesis > div + div { border-left: none; border-top: 1px solid var(--paper-alt); }
+    .stat-grid-2, .stat-grid-3, .fix-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<a style="font-family: 'Archivo', sans-serif; font-size: 12px; font-weight: 700; color: var(--muted); text-decoration: none; display: inline-block; padding: 20px 32px 0;" href="index.html">&larr; All case studies</a>
+<div class="wrap">
+
+  <div class="header" style="padding: 12px 32px 0;">
+    <div class="eyebrow">Persistent impact tracker — case study 01 of many</div>
+    <h1>School meals: what the research predicts,<br>what states actually deliver</h1>
+    <p class="lede">The National School Lunch Program is the first case study for tracking the gap between published intervention research and real-world implementation, read through a behavioral-economics lens.</p>
+  </div>
+
+  <div class="rule-thick"></div>
+  <div class="rule" style="margin-bottom: 22px;"></div>
+
+  <div class="section thesis">
+    <div>
+      <div class="eyebrow label">Theory</div>
+      <div class="body">Removing income-based sorting and paperwork should raise take-up among eligible kids, without changing who is eligible.</div>
+    </div>
+    <div>
+      <div class="eyebrow label">Practice</div>
+      <div class="body">States that made meals free for everyone saw real gains: Vermont, Maine and Colorado grew participation 79–85% since 2020.</div>
+    </div>
+    <div>
+      <div class="eyebrow label">The gap</div>
+      <div class="body">Comparable means-tested states grew only 1–7% in the same period. Only 8 states have made universal meals permanent.</div>
+    </div>
+  </div>
+
+  <div class="rule" style="margin: 4px 32px 28px;"></div>
+
+  <div class="section" style="margin-bottom: 30px;">
+    <div class="eyebrow" style="margin-bottom: 10px;">Gap severity score</div>
+    <div class="score-row">
+      <div style="min-width: 130px;">
+        <div class="num score-num" id="scoreNum">–</div>
+        <div class="score-tag" id="scoreTag"></div>
+        <div class="score-sub">out of 100</div>
+      </div>
+      <div style="flex: 1; min-width: 260px;">
+        <div class="weight-row">
+          <div class="top"><span>Adoption gap</span><span>input 84 · weight <span id="wAdoptionVal">40</span>%</span></div>
+          <input type="range" min="0" max="60" step="1" value="40" id="wAdoption">
+        </div>
+        <div class="weight-row">
+          <div class="top"><span>Effect magnitude</span><span>input 95 · weight <span id="wEffectVal">30</span>%</span></div>
+          <input type="range" min="0" max="60" step="1" value="30" id="wEffect">
+        </div>
+        <div class="weight-row">
+          <div class="top"><span>Evidence age</span><span>input 100 · weight <span id="wEvidenceVal">15</span>%</span></div>
+          <input type="range" min="0" max="60" step="1" value="15" id="wEvidence">
+        </div>
+        <div class="weight-row">
+          <div class="top"><span>Friction clarity</span><span>input 85 · weight <span id="wFrictionVal">15</span>%</span></div>
+          <input type="range" min="0" max="60" step="1" value="15" id="wFriction">
+        </div>
+        <div class="footnote" id="saveStatus">Loading saved weights…</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rule" style="margin: 0 32px 28px;"></div>
+
+  <div class="section">
+    <div class="tabs">
+      <button class="tabbtn active" data-tab="growth">State growth since 2020</button>
+      <button class="tabbtn" data-tab="friction">The friction, quantified</button>
+    </div>
+
+    <div class="tabpanel active" id="tab-growth">
+      <div class="legend">
+        <span><span class="swatch" style="background: var(--green);"></span>Universal free meals</span>
+        <span><span class="swatch" style="background: var(--brick);"></span>Means-tested (status quo)</span>
+      </div>
+      <div class="chart" id="chart"></div>
+      <p class="caption">Only the six states with sourced FY2020–FY2024 growth figures are shown. Other states are not yet in this dataset — flagged here deliberately rather than estimated, since an honest gap in the data is more useful than a filled-in guess.</p>
+    </div>
+
+    <div class="tabpanel" id="tab-friction">
+      <div class="stat-grid-2">
+        <div class="stat-card">
+          <div class="big" style="color: var(--brick);">20%</div>
+          <div class="desc">of parents whose children are eligible for free or reduced-price meals but don't participate cite stigma as the reason.</div>
+        </div>
+        <div class="stat-card">
+          <div class="big" style="color: var(--green);">60%</div>
+          <div class="desc">of NSLP schools now operate some universal-meal option, mostly through automatic eligibility instead of an application.</div>
+        </div>
+      </div>
+
+      <div class="mechanism">
+        <div class="eyebrow" style="margin-bottom: 6px;">Mechanism</div>
+        <p>Students who report feeling embarrassed about eating school lunch are significantly less likely to participate, an effect concentrated among lower-income households — the exact group the program is meant to reach. The barrier isn't information about nutrition. It's the social and administrative cost of accessing the benefit: paperwork, visible separate lines, and identity exposure. That reframes the fix from "explain the benefit better" to "remove the friction structurally."</p>
+      </div>
+
+      <div class="eyebrow" style="margin-bottom: 8px;">Two structural fixes, same target</div>
+      <div class="fix-grid">
+        <div class="fix-card">
+          <div class="t">Direct certification</div>
+          <div class="d">Cross-references SNAP and Medicaid data to auto-enroll eligible students, no application required.</div>
+        </div>
+        <div class="fix-card">
+          <div class="t">Universal free meals</div>
+          <div class="d">Removes income-based sorting entirely, so no student's meal status is ever visible to peers.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rule" style="margin: 32px 32px 20px;"></div>
+
+  <div class="section">
+    <div class="eyebrow" style="margin-bottom: 10px;">Five-state before / after, 2018–19 vs 2022–23</div>
+    <div class="stat-grid-3">
+      <div><div class="num big">+6%</div><div class="desc">overall meal participation across CA, ME, MA, NV, VT</div></div>
+      <div><div class="num big">+233,656</div><div class="desc">more students served lunch</div></div>
+      <div><div class="num big">+129,264</div><div class="desc">more students served breakfast</div></div>
+    </div>
+
+    <div class="eyebrow" style="margin-bottom: 8px;">Sources</div>
+    <p class="sources">USAFacts, state NSLP participation change FY2020–FY2024 · Food Research and Action Center, "The State of Healthy School Meals for All," 2024 · USDA Economic Research Service, "State Universal Free School Meal Policies Reduced Food Insufficiency," 2024 · Congressional Research Service, "School Lunch and Breakfast Participation," 2025 · Glantz et al., 1994, national parent survey on FRPM non-participation · PMC, "Universal School Meal Policies and Perceived Stigma," 2025.</p>
+    <p class="footnote" style="margin-top: 14px;">Prototype status: this is case study one of a planned series. Next up: financial literacy programs for women in low-income countries.</p>
+    <p class="footnote" style="margin-top: 8px;">Data last refreshed: July 6, 2026. Your severity-score weighting is saved in this browser and will still be here next time you open it on this device.</p>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  var STATE_GROWTH = [
+    { state: "Vermont", code: "VT", growth: 85, policy: "universal", note: "Permanent universal free meals since 2023" },
+    { state: "Maine", code: "ME", growth: 82, policy: "universal", note: "Permanent universal free meals since 2022" },
+    { state: "Colorado", code: "CO", growth: 79, policy: "universal", note: "Permanent universal free meals since 2023" },
+    { state: "South Dakota", code: "SD", growth: 7, policy: "means-tested", note: "No statewide universal policy" },
+    { state: "Utah", code: "UT", growth: 4, policy: "means-tested", note: "No statewide universal policy" },
+    { state: "Tennessee", code: "TN", growth: 1, policy: "means-tested", note: "No statewide universal policy" }
+  ];
+  var POLICY_COLOR = { universal: "#34633F", "means-tested": "#A23E2C" };
+  var NATIONAL_AVG = 33;
+  var SCORE_INPUTS = { adoption: 84, effect: 95, evidence: 100, friction: 85 };
+  var DEFAULT_WEIGHTS = { adoption: 40, effect: 30, evidence: 15, friction: 15 };
+
+  function renderChart() {
+    var el = document.getElementById("chart");
+    var maxVal = Math.max.apply(null, STATE_GROWTH.map(function (d) { return d.growth; }).concat([NATIONAL_AVG])) * 1.15;
+    var avgPct = (NATIONAL_AVG / maxVal) * 100;
+
+    var avgLine = document.createElement("div");
+    avgLine.className = "avg-line";
+    avgLine.style.bottom = avgPct + "%";
+    var avgLabel = document.createElement("div");
+    avgLabel.className = "avg-label";
+    avgLabel.textContent = "US average +" + NATIONAL_AVG + "%";
+    avgLabel.style.bottom = avgPct + "%";
+    avgLabel.style.position = "absolute";
+    el.appendChild(avgLine);
+    el.appendChild(avgLabel);
+
+    STATE_GROWTH.forEach(function (d) {
+      var col = document.createElement("div");
+      col.className = "bar-col";
+
+      var tooltip = document.createElement("div");
+      tooltip.className = "tooltip";
+      tooltip.innerHTML =
+        '<div class="t-state">' + d.state + '</div>' +
+        '<div class="t-growth" style="color:' + POLICY_COLOR[d.policy] + ';">+' + d.growth + '%</div>' +
+        '<div class="t-sub">participation growth since FY2020</div>' +
+        '<div class="t-note">' + d.note + '</div>';
+
+      var value = document.createElement("div");
+      value.className = "bar-value";
+      value.style.color = POLICY_COLOR[d.policy];
+      value.textContent = "+" + d.growth + "%";
+
+      var bar = document.createElement("div");
+      bar.className = "bar";
+      bar.style.height = (d.growth / maxVal) * 100 + "%";
+      bar.style.background = POLICY_COLOR[d.policy];
+
+      var label = document.createElement("div");
+      label.className = "bar-label";
+      label.textContent = d.code;
+
+      col.appendChild(tooltip);
+      col.appendChild(value);
+      col.appendChild(bar);
+      col.appendChild(label);
+      el.appendChild(col);
+    });
+  }
+
+  function scoreLabel(score) {
+    if (score >= 75) return { text: "Severe gap", color: "#A23E2C" };
+    if (score >= 50) return { text: "High gap", color: "#B8860B" };
+    if (score >= 25) return { text: "Moderate gap", color: "#7A6A2E" };
+    return { text: "Low gap", color: "#34633F" };
+  }
+
+  function computeAndRenderScore(weights) {
+    var sum = weights.adoption + weights.effect + weights.evidence + weights.friction || 1;
+    var raw =
+      (SCORE_INPUTS.adoption * weights.adoption +
+        SCORE_INPUTS.effect * weights.effect +
+        SCORE_INPUTS.evidence * weights.evidence +
+        SCORE_INPUTS.friction * weights.friction) / sum;
+    var score = Math.round(raw);
+    var label = scoreLabel(score);
+    var numEl = document.getElementById("scoreNum");
+    var tagEl = document.getElementById("scoreTag");
+    numEl.textContent = score;
+    numEl.style.color = label.color;
+    tagEl.textContent = label.text;
+    tagEl.style.color = label.color;
+  }
+
+  function loadWeights() {
+    try {
+      var raw = window.localStorage.getItem("schoolmeals-weights");
+      if (raw) return Object.assign({}, DEFAULT_WEIGHTS, JSON.parse(raw));
+    } catch (e) {}
+    return Object.assign({}, DEFAULT_WEIGHTS);
+  }
+
+  function saveWeights(weights) {
+    var statusEl = document.getElementById("saveStatus");
+    try {
+      window.localStorage.setItem("schoolmeals-weights", JSON.stringify(weights));
+      statusEl.textContent = "Weights are saved in this browser and will be here next time you open this.";
+    } catch (e) {
+      statusEl.textContent = "Couldn't save weights in this browser.";
+    }
+  }
+
+  function setupWeights() {
+    var weights = loadWeights();
+    var ids = { adoption: "wAdoption", effect: "wEffect", evidence: "wEvidence", friction: "wFriction" };
+    var valIds = { adoption: "wAdoptionVal", effect: "wEffectVal", evidence: "wEvidenceVal", friction: "wFrictionVal" };
+
+    Object.keys(ids).forEach(function (key) {
+      var input = document.getElementById(ids[key]);
+      input.value = weights[key];
+      document.getElementById(valIds[key]).textContent = weights[key];
+      input.addEventListener("input", function () {
+        weights[key] = Number(input.value);
+        document.getElementById(valIds[key]).textContent = weights[key];
+        computeAndRenderScore(weights);
+        saveWeights(weights);
+      });
+    });
+
+    document.getElementById("saveStatus").textContent = "Weights are saved in this browser and will be here next time you open this.";
+    computeAndRenderScore(weights);
+  }
+
+  function setupTabs() {
+    var buttons = document.querySelectorAll(".tabbtn");
+    buttons.forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        buttons.forEach(function (b) { b.classList.remove("active"); });
+        btn.classList.add("active");
+        document.querySelectorAll(".tabpanel").forEach(function (p) { p.classList.remove("active"); });
+        document.getElementById("tab-" + btn.getAttribute("data-tab")).classList.add("active");
+      });
+    });
+  }
+
+  renderChart();
+  setupWeights();
+  setupTabs();
+})();
+</script>
+</body>
+</html>

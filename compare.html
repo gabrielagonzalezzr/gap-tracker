@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Compare case studies — gap tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+  :root { --ink:#17160F; --paper:#F7F5EE; --paper-alt:#EEE9D8; --muted:#6E6C61; --green:#34633F; --mustard:#B8860B; --olive:#7A6A2E; --brick:#A23E2C; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font-family: 'Source Serif 4', Georgia, serif; }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 0 0 48px; }
+  .eyebrow { font-family: 'Archivo', sans-serif; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; font-size: 11px; color: var(--muted); }
+  .backlink { font-family: 'Archivo', sans-serif; font-size: 12px; font-weight: 700; color: var(--muted); text-decoration: none; display: inline-block; padding: 20px 32px 0; }
+  .backlink:hover { color: var(--ink); }
+  .num { font-family: 'Archivo', sans-serif; font-variant-numeric: tabular-nums; }
+  h1 { font-family: 'Archivo', sans-serif; font-weight: 900; font-size: 32px; line-height: 1.1; margin: 10px 0 12px; letter-spacing: -0.01em; }
+  .lede { font-size: 16px; color: var(--muted); max-width: 640px; margin: 0; line-height: 1.6; }
+  .rule-thick { height: 6px; background: var(--ink); margin: 24px 0 0; }
+  .rule { height: 1px; background: var(--ink); }
+  .header { padding: 12px 32px 0; }
+  .section { padding: 0 32px; }
+
+  .rankrow { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+  .rankrow .name { font-family: 'Archivo', sans-serif; font-weight: 700; font-size: 13.5px; width: 190px; flex-shrink: 0; }
+  .rankrow .track { flex: 1; height: 22px; background: var(--paper-alt); position: relative; }
+  .rankrow .fill { height: 100%; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; }
+  .rankrow .fill span { font-family: 'Archivo', sans-serif; font-weight: 900; font-size: 12px; color: var(--paper); }
+  .rankrow a { text-decoration: none; color: inherit; display: contents; }
+  .rankrow:hover .name { text-decoration: underline; }
+
+  table { width: 100%; border-collapse: collapse; margin-top: 6px; }
+  th, td { text-align: left; padding: 10px 8px; font-size: 13px; border-bottom: 1px solid var(--paper-alt); }
+  th { font-family: 'Archivo', sans-serif; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+  td.rowlabel { font-family: 'Archivo', sans-serif; font-weight: 700; }
+  td.rowlabel a { color: inherit; text-decoration: none; }
+  td.rowlabel a:hover { text-decoration: underline; }
+  .minibar-cell { min-width: 90px; }
+  .minibar-track { background: var(--paper-alt); height: 8px; width: 100%; position: relative; margin-bottom: 3px; }
+  .minibar-fill { height: 100%; }
+  .minibar-val { font-family: 'Archivo', sans-serif; font-size: 11px; color: var(--muted); }
+
+  .insight { border-left: 3px solid var(--mustard); padding-left: 16px; margin: 26px 0; }
+  .insight p { font-size: 14.5px; line-height: 1.6; margin: 0 0 12px; }
+  .insight p:last-child { margin-bottom: 0; }
+
+  .legend-row { display: flex; gap: 16px; flex-wrap: wrap; font-family: 'Archivo', sans-serif; font-size: 11.5px; color: var(--muted); margin: 10px 0 24px; }
+  .legend-row span { display: flex; align-items: center; gap: 5px; }
+  .sw { width: 10px; height: 10px; display: inline-block; }
+
+  @media (max-width: 600px) {
+    .rankrow .name { width: 120px; font-size: 12px; }
+    table { font-size: 11.5px; }
+    th, td { padding: 8px 4px; }
+  }
+</style>
+</head>
+<body>
+<a class="backlink" href="index.html">&larr; All case studies</a>
+<div class="wrap">
+  <div class="header">
+    <div class="eyebrow">Persistent impact tracker — comparison view</div>
+    <h1>Five case studies, side by side</h1>
+    <p class="lede">Same scoring model applied to five very different interventions. The point isn't to rank which cause matters more &mdash; it's to see which gaps are best understood and most actionable right now.</p>
+  </div>
+
+  <div class="rule-thick"></div>
+  <div class="rule" style="margin-bottom: 26px;"></div>
+
+  <div class="section">
+    <div class="eyebrow" style="margin-bottom: 14px;">Overall severity score</div>
+    <div id="ranking"></div>
+
+    <div class="rule" style="margin: 22px 0;"></div>
+
+    <div class="eyebrow" style="margin-bottom: 10px;">Score breakdown by factor</div>
+    <table>
+      <thead>
+        <tr><th>Case study</th><th>Adoption gap</th><th>Effect magnitude</th><th>Evidence age</th><th>Friction clarity</th></tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+
+    <div class="insight">
+      <p><strong>School meals and legal services</strong> score highest on every factor &mdash; large, clearly measured effects, long-documented evidence, and a well-understood single mechanism. These are the clearest cases of "we know the fix, it's just not adopted broadly enough."</p>
+      <p><strong>Digital finance and youth training</strong> sit in the middle: real, meaningful gaps, but either the mechanism is more compound (several overlapping frictions) or the evidence base is newer.</p>
+      <p><strong>Reentry employment</strong> scores lowest, deliberately. Its effect and friction scores are low not because the issue matters less, but because the research itself hasn't confirmed a clear causal fix yet &mdash; a genuinely different kind of gap than the other four.</p>
+    </div>
+
+    <div class="legend-row">
+      <span><span class="sw" style="background: var(--brick);"></span>75&ndash;100 Severe</span>
+      <span><span class="sw" style="background: var(--mustard);"></span>50&ndash;74 High</span>
+      <span><span class="sw" style="background: var(--olive);"></span>25&ndash;49 Moderate</span>
+      <span><span class="sw" style="background: var(--green);"></span>0&ndash;24 Low</span>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var CASES = [
+    { name: "School meals", url: "school-meals.html", topic: "Education, US", weights: {adoption:40,effect:30,evidence:15,friction:15}, inputs: {adoption:84, effect:95, evidence:100, friction:85} },
+    { name: "Digital finance", url: "financial-literacy.html", topic: "Financial inclusion, LatAm", weights: {adoption:40,effect:30,evidence:15,friction:15}, inputs: {adoption:55, effect:60, evidence:70, friction:70} },
+    { name: "Legal services", url: "legal-services.html", topic: "Legal access, US", weights: {adoption:40,effect:30,evidence:15,friction:15}, inputs: {adoption:90, effect:90, evidence:95, friction:75} },
+    { name: "Youth job training", url: "vocational-training.html", topic: "Workforce dev., US", weights: {adoption:40,effect:30,evidence:15,friction:15}, inputs: {adoption:80, effect:85, evidence:60, friction:80} },
+    { name: "Reentry employment", url: "reentry-employment.html", topic: "Criminal justice, US", weights: {adoption:40,effect:30,evidence:15,friction:15}, inputs: {adoption:70, effect:35, evidence:40, friction:35} }
+  ];
+
+  function computeScore(c) {
+    var w = c.weights, i = c.inputs;
+    var sum = w.adoption + w.effect + w.evidence + w.friction || 1;
+    return Math.round((i.adoption*w.adoption + i.effect*w.effect + i.evidence*w.evidence + i.friction*w.friction) / sum);
+  }
+  function tierColor(score) {
+    if (score >= 75) return "#A23E2C";
+    if (score >= 50) return "#B8860B";
+    if (score >= 25) return "#7A6A2E";
+    return "#34633F";
+  }
+  function factorColor(v) {
+    if (v >= 75) return "#A23E2C";
+    if (v >= 50) return "#B8860B";
+    if (v >= 25) return "#7A6A2E";
+    return "#34633F";
+  }
+
+  var scored = CASES.map(function (c) { return Object.assign({}, c, { score: computeScore(c) }); });
+  scored.sort(function (a, b) { return b.score - a.score; });
+
+  var rankingEl = document.getElementById("ranking");
+  scored.forEach(function (c) {
+    var row = document.createElement("a");
+    row.href = c.url;
+    row.className = "rankrow";
+    var color = tierColor(c.score);
+    row.innerHTML =
+      '<div class="name">' + c.name + '</div>' +
+      '<div class="track"><div class="fill" style="width:' + c.score + '%; background:' + color + ';"><span>' + c.score + '</span></div></div>';
+    rankingEl.appendChild(row);
+  });
+
+  var tbody = document.getElementById("tableBody");
+  scored.forEach(function (c) {
+    var tr = document.createElement("tr");
+    var factors = [
+      ["adoption", c.inputs.adoption],
+      ["effect", c.inputs.effect],
+      ["evidence", c.inputs.evidence],
+      ["friction", c.inputs.friction]
+    ];
+    var cells = factors.map(function (f) {
+      var val = f[1];
+      var col = factorColor(val);
+      return '<td class="minibar-cell"><div class="minibar-track"><div class="minibar-fill" style="width:' + val + '%; background:' + col + ';"></div></div><div class="minibar-val">' + val + '</div></td>';
+    }).join("");
+    tr.innerHTML = '<td class="rowlabel"><a href="' + c.url + '">' + c.name + '</a><div style="font-weight:500; color:var(--muted); font-size:11px; margin-top:2px;">' + c.topic + '</div></td>' + cells;
+    tbody.appendChild(tr);
+  });
+})();
+</script>
+</body>
+</html>

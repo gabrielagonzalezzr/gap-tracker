@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Legal services gap tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+  :root { --ink:#17160F; --paper:#F7F5EE; --paper-alt:#EEE9D8; --muted:#6E6C61; --green:#34633F; --mustard:#B8860B; --brick:#A23E2C; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font-family: 'Source Serif 4', Georgia, serif; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 0 0 48px; }
+  .eyebrow { font-family: 'Archivo', sans-serif; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; font-size: 11px; color: var(--muted); }
+  .backlink { font-family: 'Archivo', sans-serif; font-size: 12px; font-weight: 700; color: var(--muted); text-decoration: none; display: inline-block; padding: 20px 32px 0; }
+  .backlink:hover { color: var(--ink); }
+  .num { font-family: 'Archivo', sans-serif; font-variant-numeric: tabular-nums; }
+  h1 { font-family: 'Archivo', sans-serif; font-weight: 900; font-size: 32px; line-height: 1.1; margin: 10px 0 12px; letter-spacing: -0.01em; }
+  .lede { font-size: 16px; color: var(--muted); max-width: 620px; margin: 0; line-height: 1.6; }
+  .rule-thick { height: 6px; background: var(--ink); margin: 24px 0 0; }
+  .rule { height: 1px; background: var(--ink); }
+  .header { padding: 12px 32px 0; }
+  .section { padding: 0 32px; }
+  .thesis { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0; }
+  .thesis > div { padding: 0 20px 20px; }
+  .thesis > div + div { border-left: 1px solid var(--paper-alt); }
+  .thesis .label { margin-bottom: 8px; }
+  .thesis .body { font-size: 14.5px; line-height: 1.55; }
+  .score-row { display: flex; gap: 28px; align-items: flex-start; flex-wrap: wrap; }
+  .score-num { font-size: 56px; font-weight: 900; line-height: 1; }
+  .score-tag { font-family: 'Archivo', sans-serif; font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 6px; }
+  .score-sub { font-size: 11.5px; color: var(--muted); margin-top: 6px; }
+  .weight-row { margin-bottom: 10px; }
+  .weight-row .top { display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 3px; }
+  .weight-row .top span:first-child { font-family: 'Archivo', sans-serif; font-weight: 700; }
+  .weight-row .top span:last-child { color: var(--muted); }
+  input[type="range"] { width: 100%; }
+  .tabs { display: flex; gap: 24px; margin-bottom: 18px; }
+  .tabbtn { font-family: 'Archivo', sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; background: none; border: none; cursor: pointer; padding: 10px 0; border-bottom: 3px solid transparent; color: var(--muted); }
+  .tabbtn.active { color: var(--ink); border-bottom: 3px solid var(--ink); }
+  .tabpanel { display: none; }
+  .tabpanel.active { display: block; }
+  .legend { display: flex; gap: 18px; margin-bottom: 14px; font-family: 'Archivo', sans-serif; font-size: 12px; flex-wrap: wrap; }
+  .legend span { display: flex; align-items: center; gap: 6px; }
+  .swatch { width: 11px; height: 11px; display: inline-block; }
+  .chart { position: relative; height: 300px; display: flex; align-items: flex-end; gap: 10px; padding: 10px 4px 0; border-bottom: 1px solid var(--ink); }
+  .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; position: relative; cursor: default; }
+  .bar { width: 44px; border-radius: 3px 3px 0 0; position: relative; }
+  .bar-label { font-family: 'Archivo', sans-serif; font-size: 11px; font-weight: 700; margin-top: 8px; text-align: center; line-height: 1.3; }
+  .bar-value { font-family: 'Archivo', sans-serif; font-size: 13px; font-weight: 900; margin-bottom: 6px; }
+  .tooltip { display: none; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: var(--paper); border: 1.5px solid var(--ink); padding: 10px 14px; font-family: 'Archivo', sans-serif; width: 210px; text-align: left; z-index: 5; margin-bottom: 8px; }
+  .bar-col:hover .tooltip { display: block; }
+  .tooltip .t-state { font-weight: 900; font-size: 13px; }
+  .tooltip .t-growth { font-size: 20px; font-weight: 900; font-variant-numeric: tabular-nums; }
+  .tooltip .t-sub { font-size: 11px; color: var(--muted); margin-top: 2px; line-height: 1.4; }
+  .tooltip .t-note { font-size: 11px; margin-top: 6px; border-top: 1px solid var(--paper-alt); padding-top: 6px; }
+  .caption { font-size: 12.5px; color: var(--muted); margin-top: 10px; line-height: 1.5; }
+  .stat-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px; }
+  .stat-card { background: var(--paper-alt); padding: 18px 20px; }
+  .stat-card .big { font-size: 40px; font-weight: 900; line-height: 1; }
+  .stat-card .desc { font-size: 13px; margin-top: 8px; line-height: 1.5; }
+  .mechanism { border-left: 3px solid var(--mustard); padding-left: 16px; margin-bottom: 22px; }
+  .mechanism p { font-size: 14.5px; line-height: 1.6; margin: 0; }
+  .fix-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .fix-card { padding: 14px 16px; border: 1px solid var(--paper-alt); }
+  .fix-card .t { font-family: 'Archivo', sans-serif; font-weight: 800; font-size: 13px; margin-bottom: 4px; }
+  .fix-card .d { font-size: 13px; color: var(--muted); line-height: 1.5; }
+  .stat-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 22px; }
+  .stat-grid-3 .big { font-size: 28px; font-weight: 900; }
+  .stat-grid-3 .desc { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+  .sources { font-size: 11.5px; color: var(--muted); line-height: 1.7; margin: 0; }
+  .footnote { font-size: 11.5px; color: var(--muted); line-height: 1.6; }
+  @media (max-width: 600px) {
+    .thesis { grid-template-columns: 1fr; }
+    .thesis > div + div { border-left: none; border-top: 1px solid var(--paper-alt); }
+    .stat-grid-2, .stat-grid-3, .fix-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<a class="backlink" href="index.html">&larr; All case studies</a>
+<div class="wrap">
+  <div class="header">
+    <div class="eyebrow">Persistent impact tracker — case study 03 of many</div>
+    <h1>Civil legal aid: a right that only<br>exists for some cases</h1>
+    <p class="lede">A third case study, focused on women's access to legal representation in domestic violence, custody, and eviction proceedings — the areas where representation matters most and is hardest to get.</p>
+  </div>
+
+  <div class="rule-thick"></div>
+  <div class="rule" style="margin-bottom: 22px;"></div>
+
+  <div class="section thesis">
+    <div>
+      <div class="eyebrow label">Theory</div>
+      <div class="body">Legal representation in protective order, custody, and eviction cases dramatically improves safety and housing outcomes, especially for domestic violence survivors.</div>
+    </div>
+    <div>
+      <div class="eyebrow label">Practice</div>
+      <div class="body">In cities with a right to counsel, represented tenants stay housed at far higher rates than those without a lawyer — sometimes more than double.</div>
+    </div>
+    <div>
+      <div class="eyebrow label">The gap</div>
+      <div class="body">92% of low-income Americans' substantial civil legal problems get no or inadequate help. Unlike criminal cases, there is no federal right to a lawyer in civil court at all.</div>
+    </div>
+  </div>
+
+  <div class="rule" style="margin: 4px 32px 28px;"></div>
+
+  <div class="section" style="margin-bottom: 30px;">
+    <div class="eyebrow" style="margin-bottom: 10px;">Gap severity score</div>
+    <div class="score-row">
+      <div style="min-width: 130px;">
+        <div class="num score-num" id="scoreNum">–</div>
+        <div class="score-tag" id="scoreTag"></div>
+        <div class="score-sub">out of 100</div>
+      </div>
+      <div style="flex: 1; min-width: 260px;">
+        <div class="weight-row"><div class="top"><span>Adoption gap</span><span>input 90 · weight <span id="wAdoptionVal">40</span>%</span></div><input type="range" min="0" max="60" step="1" value="40" id="wAdoption"></div>
+        <div class="weight-row"><div class="top"><span>Effect magnitude</span><span>input 90 · weight <span id="wEffectVal">30</span>%</span></div><input type="range" min="0" max="60" step="1" value="30" id="wEffect"></div>
+        <div class="weight-row"><div class="top"><span>Evidence age</span><span>input 95 · weight <span id="wEvidenceVal">15</span>%</span></div><input type="range" min="0" max="60" step="1" value="15" id="wEvidence"></div>
+        <div class="weight-row"><div class="top"><span>Friction clarity</span><span>input 75 · weight <span id="wFrictionVal">15</span>%</span></div><input type="range" min="0" max="60" step="1" value="15" id="wFriction"></div>
+        <div class="footnote" id="saveStatus">Loading saved weights…</div>
+      </div>
+    </div>
+    <p class="caption" style="margin-top: 14px;">This case study scores as the most severe so far: unlike school meals, there isn't even a patchwork of 8 states with a fix in place. The constitutional right to counsel that exists for criminal cases (since 1963) has never been extended to civil matters nationally.</p>
+  </div>
+
+  <div class="rule" style="margin: 0 32px 28px;"></div>
+
+  <div class="section">
+    <div class="tabs">
+      <button class="tabbtn active" data-tab="growth">Represented vs. unrepresented</button>
+      <button class="tabbtn" data-tab="friction">The friction, quantified</button>
+    </div>
+
+    <div class="tabpanel active" id="tab-growth">
+      <div class="legend">
+        <span><span class="swatch" style="background: var(--green);"></span>With a lawyer</span>
+        <span><span class="swatch" style="background: var(--brick);"></span>Without a lawyer</span>
+      </div>
+      <div class="chart" id="chart"></div>
+      <p class="caption">Three jurisdictions with a clean, sourced comparison between represented and unrepresented outcomes in eviction cases. Legal aid research points to similar patterns in custody and protective order cases, though city-level data there is thinner and not shown here.</p>
+    </div>
+
+    <div class="tabpanel" id="tab-friction">
+      <div class="stat-grid-2">
+        <div class="stat-card">
+          <div class="big" style="color: var(--brick);">46%</div>
+          <div class="desc">of low-income Americans who didn't seek legal help for a problem cite cost concerns as a reason.</div>
+        </div>
+        <div class="stat-card">
+          <div class="big" style="color: var(--green);">80%</div>
+          <div class="desc">reduction in police-reported physical violence in the 12 months after a survivor obtains a permanent protective order.</div>
+        </div>
+      </div>
+      <div class="mechanism">
+        <div class="eyebrow" style="margin-bottom: 6px;">Mechanism</div>
+        <p>Unlike criminal defendants, people in civil court have no constitutional right to a free lawyer — a distinction that traces back to the 1963 Supreme Court case that guaranteed counsel only for criminal cases. On top of that structural gap, cost concerns, self-doubt about affording representation, and, for domestic violence survivors specifically, not recognizing a problem as "legal" in nature all compound to keep people out of the system that could protect them. Legal aid organizations funded to help are forced to turn away roughly half of eligible cases due to a lack of resources, a rate that hasn't improved since it was first measured in 2005.</p>
+      </div>
+      <div class="eyebrow" style="margin-bottom: 8px;">Where the fix is being tried</div>
+      <div class="fix-grid">
+        <div class="fix-card">
+          <div class="t">Right to counsel laws</div>
+          <div class="d">18 cities and 5 states now guarantee a lawyer in eviction proceedings, though the model rarely extends yet to family law or protective order cases.</div>
+        </div>
+        <div class="fix-card">
+          <div class="t">Built-in legal presumptions</div>
+          <div class="d">Laws like California's Family Code 3044 bake protection into the custody decision itself, reducing how much individual advocacy a survivor needs to secure a safe outcome.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rule" style="margin: 32px 32px 20px;"></div>
+
+  <div class="section">
+    <div class="eyebrow" style="margin-bottom: 10px;">The scale of the justice gap</div>
+    <div class="stat-grid-3">
+      <div><div class="num big">92%</div><div class="desc">of substantial civil legal problems facing low-income Americans get no or inadequate help</div></div>
+      <div><div class="num big">2x</div><div class="desc">the civil legal needs domestic violence survivors face compared with other low-income people</div></div>
+      <div><div class="num big">53%</div><div class="desc">of low-income Americans doubt they could find an affordable lawyer if they needed one</div></div>
+    </div>
+    <div class="eyebrow" style="margin-bottom: 8px;">Sources</div>
+    <p class="sources">Legal Services Corporation, "The Justice Gap: The Unmet Civil Legal Needs of Low-Income Americans," 2022 · LSC, "How Legal Aid Helps Domestic Violence Survivors" · National Legal Aid & Defender Association, funding brief on domestic violence and foster care outcomes · National Low Income Housing Coalition, "Advancing Tenant Protections: The Right to Counsel for Tenants Facing Eviction," 2023–2024 · Civil Right to Counsel National Coalition, city-level right-to-counsel outcomes, 2024 · California Family Code Section 3044.</p>
+    <p class="footnote" style="margin-top: 14px;">Prototype status: this is case study three of a planned series.</p>
+    <p class="footnote" style="margin-top: 8px;">Data last refreshed: July 7, 2026. Your severity-score weighting is saved in this browser and will still be here next time you open it on this device.</p>
+  </div>
+</div>
+
+<script>
+(function () {
+  var DATA = [
+    { state: "Hennepin Co., MN — with lawyer", code: "Hennepin\n(represented)", growth: 78, policy: "with", note: "78% left with a clean eviction record, 2018 study" },
+    { state: "Hennepin Co., MN — no lawyer", code: "Hennepin\n(unrepresented)", growth: 6, policy: "without", note: "Only 6% of unrepresented tenants left with a clean record" },
+    { state: "Philadelphia — with lawyer", code: "Philadelphia\n(represented)", growth: 76, policy: "with", note: "76% of full-representation cases preserved housing" },
+    { state: "Philadelphia — no lawyer", code: "Philadelphia\n(advice only)", growth: 37, policy: "without", note: "Only 37% of advice-only cases preserved housing" },
+    { state: "Boston pilot — with lawyer", code: "Boston pilot\n(represented)", growth: 67, policy: "with", note: "Two-thirds of represented tenants remained housed, 2009–2011 pilot" },
+    { state: "Boston pilot — no lawyer", code: "Boston pilot\n(unrepresented)", growth: 33, policy: "without", note: "Only one-third of unrepresented tenants remained housed" }
+  ];
+  var POLICY_COLOR = { with: "#34633F", without: "#A23E2C" };
+  var SCORE_INPUTS = { adoption: 90, effect: 90, evidence: 95, friction: 75 };
+  var DEFAULT_WEIGHTS = { adoption: 40, effect: 30, evidence: 15, friction: 15 };
+
+  function renderChart() {
+    var el = document.getElementById("chart");
+    var maxVal = Math.max.apply(null, DATA.map(function (d) { return d.growth; })) * 1.15;
+    DATA.forEach(function (d) {
+      var col = document.createElement("div");
+      col.className = "bar-col";
+      var tooltip = document.createElement("div");
+      tooltip.className = "tooltip";
+      tooltip.innerHTML = '<div class="t-state">' + d.state + '</div><div class="t-growth" style="color:' + POLICY_COLOR[d.policy] + ';">' + d.growth + '%</div><div class="t-sub">remained housed / clean record</div><div class="t-note">' + d.note + '</div>';
+      var value = document.createElement("div");
+      value.className = "bar-value";
+      value.style.color = POLICY_COLOR[d.policy];
+      value.textContent = d.growth + "%";
+      var bar = document.createElement("div");
+      bar.className = "bar";
+      bar.style.height = (d.growth / maxVal) * 100 + "%";
+      bar.style.background = POLICY_COLOR[d.policy];
+      var label = document.createElement("div");
+      label.className = "bar-label";
+      label.textContent = d.code;
+      col.appendChild(tooltip); col.appendChild(value); col.appendChild(bar); col.appendChild(label);
+      el.appendChild(col);
+    });
+  }
+
+  function scoreLabel(score) {
+    if (score >= 75) return { text: "Severe gap", color: "#A23E2C" };
+    if (score >= 50) return { text: "High gap", color: "#B8860B" };
+    if (score >= 25) return { text: "Moderate gap", color: "#7A6A2E" };
+    return { text: "Low gap", color: "#34633F" };
+  }
+  function computeAndRenderScore(weights) {
+    var sum = weights.adoption + weights.effect + weights.evidence + weights.friction || 1;
+    var raw = (SCORE_INPUTS.adoption*weights.adoption + SCORE_INPUTS.effect*weights.effect + SCORE_INPUTS.evidence*weights.evidence + SCORE_INPUTS.friction*weights.friction) / sum;
+    var score = Math.round(raw);
+    var label = scoreLabel(score);
+    document.getElementById("scoreNum").textContent = score;
+    document.getElementById("scoreNum").style.color = label.color;
+    document.getElementById("scoreTag").textContent = label.text;
+    document.getElementById("scoreTag").style.color = label.color;
+  }
+  function loadWeights() {
+    try { var raw = window.localStorage.getItem("legalservices-weights"); if (raw) return Object.assign({}, DEFAULT_WEIGHTS, JSON.parse(raw)); } catch (e) {}
+    return Object.assign({}, DEFAULT_WEIGHTS);
+  }
+  function saveWeights(weights) {
+    var statusEl = document.getElementById("saveStatus");
+    try { window.localStorage.setItem("legalservices-weights", JSON.stringify(weights)); statusEl.textContent = "Weights are saved in this browser and will be here next time you open this."; }
+    catch (e) { statusEl.textContent = "Couldn't save weights in this browser."; }
+  }
+  function setupWeights() {
+    var weights = loadWeights();
+    var ids = { adoption: "wAdoption", effect: "wEffect", evidence: "wEvidence", friction: "wFriction" };
+    var valIds = { adoption: "wAdoptionVal", effect: "wEffectVal", evidence: "wEvidenceVal", friction: "wFrictionVal" };
+    Object.keys(ids).forEach(function (key) {
+      var input = document.getElementById(ids[key]);
+      input.value = weights[key];
+      document.getElementById(valIds[key]).textContent = weights[key];
+      input.addEventListener("input", function () {
+        weights[key] = Number(input.value);
+        document.getElementById(valIds[key]).textContent = weights[key];
+        computeAndRenderScore(weights);
+        saveWeights(weights);
+      });
+    });
+    document.getElementById("saveStatus").textContent = "Weights are saved in this browser and will be here next time you open this.";
+    computeAndRenderScore(weights);
+  }
+  function setupTabs() {
+    var buttons = document.querySelectorAll(".tabbtn");
+    buttons.forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        buttons.forEach(function (b) { b.classList.remove("active"); });
+        btn.classList.add("active");
+        document.querySelectorAll(".tabpanel").forEach(function (p) { p.classList.remove("active"); });
+        document.getElementById("tab-" + btn.getAttribute("data-tab")).classList.add("active");
+      });
+    });
+  }
+  renderChart(); setupWeights(); setupTabs();
+})();
+</script>
+</body>
+</html>

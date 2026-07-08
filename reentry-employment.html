@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Reentry employment gap tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+  :root { --ink:#17160F; --paper:#F7F5EE; --paper-alt:#EEE9D8; --muted:#6E6C61; --green:#34633F; --mustard:#B8860B; --brick:#A23E2C; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font-family: 'Source Serif 4', Georgia, serif; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 0 0 48px; }
+  .eyebrow { font-family: 'Archivo', sans-serif; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; font-size: 11px; color: var(--muted); }
+  .backlink { font-family: 'Archivo', sans-serif; font-size: 12px; font-weight: 700; color: var(--muted); text-decoration: none; display: inline-block; padding: 20px 32px 0; }
+  .backlink:hover { color: var(--ink); }
+  .num { font-family: 'Archivo', sans-serif; font-variant-numeric: tabular-nums; }
+  h1 { font-family: 'Archivo', sans-serif; font-weight: 900; font-size: 32px; line-height: 1.1; margin: 10px 0 12px; letter-spacing: -0.01em; }
+  .lede { font-size: 16px; color: var(--muted); max-width: 620px; margin: 0; line-height: 1.6; }
+  .rule-thick { height: 6px; background: var(--ink); margin: 24px 0 0; }
+  .rule { height: 1px; background: var(--ink); }
+  .header { padding: 12px 32px 0; }
+  .section { padding: 0 32px; }
+  .thesis { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0; }
+  .thesis > div { padding: 0 20px 20px; }
+  .thesis > div + div { border-left: 1px solid var(--paper-alt); }
+  .thesis .label { margin-bottom: 8px; }
+  .thesis .body { font-size: 14.5px; line-height: 1.55; }
+  .score-row { display: flex; gap: 28px; align-items: flex-start; flex-wrap: wrap; }
+  .score-num { font-size: 56px; font-weight: 900; line-height: 1; }
+  .score-tag { font-family: 'Archivo', sans-serif; font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 6px; }
+  .score-sub { font-size: 11.5px; color: var(--muted); margin-top: 6px; }
+  .weight-row { margin-bottom: 10px; }
+  .weight-row .top { display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 3px; }
+  .weight-row .top span:first-child { font-family: 'Archivo', sans-serif; font-weight: 700; }
+  .weight-row .top span:last-child { color: var(--muted); }
+  input[type="range"] { width: 100%; }
+  .tabs { display: flex; gap: 24px; margin-bottom: 18px; }
+  .tabbtn { font-family: 'Archivo', sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; background: none; border: none; cursor: pointer; padding: 10px 0; border-bottom: 3px solid transparent; color: var(--muted); }
+  .tabbtn.active { color: var(--ink); border-bottom: 3px solid var(--ink); }
+  .tabpanel { display: none; }
+  .tabpanel.active { display: block; }
+  .legend { display: flex; gap: 18px; margin-bottom: 14px; font-family: 'Archivo', sans-serif; font-size: 12px; flex-wrap: wrap; }
+  .legend span { display: flex; align-items: center; gap: 6px; }
+  .swatch { width: 11px; height: 11px; display: inline-block; }
+  .chart { position: relative; height: 260px; display: flex; align-items: flex-end; gap: 30px; padding: 10px 4px 0; border-bottom: 1px solid var(--ink); justify-content: center; }
+  .bar-col { width: 120px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; position: relative; cursor: default; }
+  .bar { width: 70px; border-radius: 3px 3px 0 0; position: relative; }
+  .bar-label { font-family: 'Archivo', sans-serif; font-size: 12px; font-weight: 700; margin-top: 8px; text-align: center; line-height: 1.3; }
+  .bar-value { font-family: 'Archivo', sans-serif; font-size: 15px; font-weight: 900; margin-bottom: 6px; }
+  .tooltip { display: none; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: var(--paper); border: 1.5px solid var(--ink); padding: 10px 14px; font-family: 'Archivo', sans-serif; width: 230px; text-align: left; z-index: 5; margin-bottom: 8px; }
+  .bar-col:hover .tooltip { display: block; }
+  .tooltip .t-state { font-weight: 900; font-size: 13px; }
+  .tooltip .t-growth { font-size: 20px; font-weight: 900; font-variant-numeric: tabular-nums; }
+  .tooltip .t-sub { font-size: 11px; color: var(--muted); margin-top: 2px; line-height: 1.4; }
+  .tooltip .t-note { font-size: 11px; margin-top: 6px; border-top: 1px solid var(--paper-alt); padding-top: 6px; }
+  .caption { font-size: 12.5px; color: var(--muted); margin-top: 10px; line-height: 1.5; }
+  .stat-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px; }
+  .stat-card { background: var(--paper-alt); padding: 18px 20px; }
+  .stat-card .big { font-size: 40px; font-weight: 900; line-height: 1; }
+  .stat-card .desc { font-size: 13px; margin-top: 8px; line-height: 1.5; }
+  .mechanism { border-left: 3px solid var(--mustard); padding-left: 16px; margin-bottom: 22px; }
+  .mechanism p { font-size: 14.5px; line-height: 1.6; margin: 0; }
+  .fix-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .fix-card { padding: 14px 16px; border: 1px solid var(--paper-alt); }
+  .fix-card .t { font-family: 'Archivo', sans-serif; font-weight: 800; font-size: 13px; margin-bottom: 4px; }
+  .fix-card .d { font-size: 13px; color: var(--muted); line-height: 1.5; }
+  .stat-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 22px; }
+  .stat-grid-3 .big { font-size: 28px; font-weight: 900; }
+  .stat-grid-3 .desc { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+  .sources { font-size: 11.5px; color: var(--muted); line-height: 1.7; margin: 0; }
+  .footnote { font-size: 11.5px; color: var(--muted); line-height: 1.6; }
+  .callout { border-left: 3px solid var(--brick); padding-left: 16px; margin: 22px 0; }
+  .callout p { font-size: 14.5px; line-height: 1.6; margin: 0; }
+  @media (max-width: 600px) {
+    .thesis { grid-template-columns: 1fr; }
+    .thesis > div + div { border-left: none; border-top: 1px solid var(--paper-alt); }
+    .stat-grid-2, .stat-grid-3, .fix-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<a class="backlink" href="index.html">&larr; All case studies</a>
+<div class="wrap">
+  <div class="header">
+    <div class="eyebrow">Persistent impact tracker — case study 05 of many</div>
+    <h1>Reentry employment: a gap in what<br>we know, not just what we do</h1>
+    <p class="lede">A fifth case study, and a different kind of gap than the others here — this time between a widely-held, intuitively reasonable theory and what rigorous evaluation has actually been able to confirm.</p>
+  </div>
+
+  <div class="rule-thick"></div>
+  <div class="rule" style="margin-bottom: 22px;"></div>
+
+  <div class="section thesis">
+    <div>
+      <div class="eyebrow label">Theory</div>
+      <div class="body">Since employment correlates strongly with lower reoffending, getting formerly incarcerated people into jobs quickly should reduce recidivism.</div>
+    </div>
+    <div>
+      <div class="eyebrow label">Practice</div>
+      <div class="body">Most rigorously evaluated employment-focused reentry programs, including a federal multi-site trial, show little to no effect on recidivism.</div>
+    </div>
+    <div>
+      <div class="eyebrow label">The gap</div>
+      <div class="body">Public investment still favors employment-only reentry models despite disappointing trial results, while a more promising combined model remains tested at just one site.</div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <div class="eyebrow" style="margin-bottom: 6px;">Why this one is different</div>
+    <p>In the other case studies here, the research clearly identifies a fix that simply isn't adopted widely enough. This one is more honest and more uncertain: researchers themselves say the connection between employment programs and reduced recidivism is "mixed at best," even though the underlying logic is sound and the correlational evidence is strong. That's worth tracking too — not every gap is a failure to implement a known answer. Some are a reminder that the answer isn't fully known yet.</p>
+  </div>
+
+  <div class="rule" style="margin: 4px 32px 28px;"></div>
+
+  <div class="section" style="margin-bottom: 30px;">
+    <div class="eyebrow" style="margin-bottom: 10px;">Gap severity score</div>
+    <div class="score-row">
+      <div style="min-width: 130px;">
+        <div class="num score-num" id="scoreNum">–</div>
+        <div class="score-tag" id="scoreTag"></div>
+        <div class="score-sub">out of 100</div>
+      </div>
+      <div style="flex: 1; min-width: 260px;">
+        <div class="weight-row"><div class="top"><span>Adoption gap</span><span>input 70 · weight <span id="wAdoptionVal">40</span>%</span></div><input type="range" min="0" max="60" step="1" value="40" id="wAdoption"></div>
+        <div class="weight-row"><div class="top"><span>Effect magnitude</span><span>input 35 · weight <span id="wEffectVal">30</span>%</span></div><input type="range" min="0" max="60" step="1" value="30" id="wEffect"></div>
+        <div class="weight-row"><div class="top"><span>Evidence age</span><span>input 40 · weight <span id="wEvidenceVal">15</span>%</span></div><input type="range" min="0" max="60" step="1" value="15" id="wEvidence"></div>
+        <div class="weight-row"><div class="top"><span>Friction clarity</span><span>input 35 · weight <span id="wFrictionVal">15</span>%</span></div><input type="range" min="0" max="60" step="1" value="15" id="wFriction"></div>
+        <div class="footnote" id="saveStatus">Loading saved weights…</div>
+      </div>
+    </div>
+    <p class="caption" style="margin-top: 14px;">The lowest score of the five case studies so far, and deliberately so. Effect magnitude and friction clarity are both scored low because the evidence itself is genuinely mixed, not because the problem doesn't matter.</p>
+  </div>
+
+  <div class="rule" style="margin: 0 32px 28px;"></div>
+
+  <div class="section">
+    <div class="tabs">
+      <button class="tabbtn active" data-tab="growth">The one clean trial we have</button>
+      <button class="tabbtn" data-tab="friction">What the research does show</button>
+    </div>
+
+    <div class="tabpanel active" id="tab-growth">
+      <div class="legend">
+        <span><span class="swatch" style="background: var(--green);"></span>Treatment group</span>
+        <span><span class="swatch" style="background: var(--brick);"></span>Control group</span>
+      </div>
+      <div class="chart" id="chart"></div>
+      <p class="caption">Milwaukee RCT (n=236 high-risk individuals with a history of violence or gang involvement): pre-release "reach-in" services plus post-release subsidized work. Employment and earnings gains were real and persisted through the year. The reincarceration difference shown here was not statistically significant — included honestly, not as proof of an effect.</p>
+    </div>
+
+    <div class="tabpanel" id="tab-friction">
+      <div class="stat-grid-2">
+        <div class="stat-card">
+          <div class="big" style="color: var(--brick);">2 in 3</div>
+          <div class="desc">formerly incarcerated people are rearrested within three years of release.</div>
+        </div>
+        <div class="stat-card">
+          <div class="big" style="color: var(--green);">~50%</div>
+          <div class="desc">lower recidivism observed among those with full-time employment, compared with those unemployed — a correlation, not a proven causal effect.</div>
+        </div>
+      </div>
+      <div class="mechanism">
+        <div class="eyebrow" style="margin-bottom: 6px;">Mechanism</div>
+        <p>The economic logic is intuitive: without legitimate income, people are more likely to return to crime. But most post-release-only programs may simply start too late — by the time someone is job-hunting after release, they're often already overwhelmed by housing instability, family strain, and substance use, all at once. The one U.S. trial that combined pre-release preparation with post-release subsidized work showed real employment and earnings gains, suggesting timing and combination of supports may matter more than employment access alone. But that finding comes from a single site, and hasn't yet been replicated at scale.</p>
+      </div>
+      <div class="eyebrow" style="margin-bottom: 8px;">Where promising signals exist</div>
+      <div class="fix-grid">
+        <div class="fix-card">
+          <div class="t">Reach-in plus wraparound</div>
+          <div class="d">Combining pre-release preparation with post-release subsidized work and support, tested so far only in Milwaukee at small scale.</div>
+        </div>
+        <div class="fix-card">
+          <div class="t">Fair-chance hiring policies</div>
+          <div class="d">Ban-the-box laws and direct employer partnerships, like Chicago transit union apprenticeships, address employer willingness to hire rather than only training the individual.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rule" style="margin: 32px 32px 20px;"></div>
+
+  <div class="section">
+    <div class="eyebrow" style="margin-bottom: 10px;">Headline figures</div>
+    <div class="stat-grid-3">
+      <div><div class="num big">13%</div><div class="desc">greater chance of employment after release for people who completed a prison education or vocational program</div></div>
+      <div><div class="num big">640K+</div><div class="desc">people leave U.S. prisons each year seeking to rejoin the workforce</div></div>
+      <div><div class="num big">1</div><div class="desc">rigorous U.S. trial to date combining pre- and post-release employment support</div></div>
+    </div>
+    <div class="eyebrow" style="margin-bottom: 8px;">Sources</div>
+    <p class="sources">RAND Corporation, 2013, prison education and vocational program evaluation · National Institute of Justice, "Research on Returning Offender Programs and Promising Practices" · J-PAL, "The Impact of a Comprehensive Re-entry Program on Employment and Recidivism in the United States" · Office of Justice Programs, "Experimental Evaluation of a Comprehensive Employment-Oriented Prisoner Re-entry Program" · Checkr, "Reentry, Recidivism & Fair Chance Hiring," 2024 · National Employment Law Project, "Reentry and Employment for the Formerly Incarcerated and the Role of American Trades Unions," 2024.</p>
+    <p class="footnote" style="margin-top: 14px;">Prototype status: this is case study five of a planned series.</p>
+    <p class="footnote" style="margin-top: 8px;">Data last refreshed: July 7, 2026. Your severity-score weighting is saved in this browser and will still be here next time you open it on this device.</p>
+  </div>
+</div>
+
+<script>
+(function () {
+  var DATA = [
+    { state: "Treatment group", code: "Treatment\n(reach-in + subsidized work)", growth: 22, policy: "treatment", note: "22% reimprisoned within 1 year of release" },
+    { state: "Control group", code: "Control\n(standard release)", growth: 26, policy: "control", note: "26% reimprisoned within 1 year of release — difference not statistically significant" }
+  ];
+  var POLICY_COLOR = { treatment: "#34633F", control: "#A23E2C" };
+  var SCORE_INPUTS = { adoption: 70, effect: 35, evidence: 40, friction: 35 };
+  var DEFAULT_WEIGHTS = { adoption: 40, effect: 30, evidence: 15, friction: 15 };
+
+  function renderChart() {
+    var el = document.getElementById("chart");
+    var maxVal = Math.max.apply(null, DATA.map(function (d) { return d.growth; })) * 1.4;
+    DATA.forEach(function (d) {
+      var col = document.createElement("div");
+      col.className = "bar-col";
+      var tooltip = document.createElement("div");
+      tooltip.className = "tooltip";
+      tooltip.innerHTML = '<div class="t-state">' + d.state + '</div><div class="t-growth" style="color:' + POLICY_COLOR[d.policy] + ';">' + d.growth + '%</div><div class="t-sub">reimprisoned within 1 year</div><div class="t-note">' + d.note + '</div>';
+      var value = document.createElement("div");
+      value.className = "bar-value";
+      value.style.color = POLICY_COLOR[d.policy];
+      value.textContent = d.growth + "%";
+      var bar = document.createElement("div");
+      bar.className = "bar";
+      bar.style.height = (d.growth / maxVal) * 100 + "%";
+      bar.style.background = POLICY_COLOR[d.policy];
+      var label = document.createElement("div");
+      label.className = "bar-label";
+      label.textContent = d.code;
+      col.appendChild(tooltip); col.appendChild(value); col.appendChild(bar); col.appendChild(label);
+      el.appendChild(col);
+    });
+  }
+  function scoreLabel(score) {
+    if (score >= 75) return { text: "Severe gap", color: "#A23E2C" };
+    if (score >= 50) return { text: "High gap", color: "#B8860B" };
+    if (score >= 25) return { text: "Moderate gap", color: "#7A6A2E" };
+    return { text: "Low gap", color: "#34633F" };
+  }
+  function computeAndRenderScore(weights) {
+    var sum = weights.adoption + weights.effect + weights.evidence + weights.friction || 1;
+    var raw = (SCORE_INPUTS.adoption*weights.adoption + SCORE_INPUTS.effect*weights.effect + SCORE_INPUTS.evidence*weights.evidence + SCORE_INPUTS.friction*weights.friction) / sum;
+    var score = Math.round(raw);
+    var label = scoreLabel(score);
+    document.getElementById("scoreNum").textContent = score;
+    document.getElementById("scoreNum").style.color = label.color;
+    document.getElementById("scoreTag").textContent = label.text;
+    document.getElementById("scoreTag").style.color = label.color;
+  }
+  function loadWeights() {
+    try { var raw = window.localStorage.getItem("reentry-weights"); if (raw) return Object.assign({}, DEFAULT_WEIGHTS, JSON.parse(raw)); } catch (e) {}
+    return Object.assign({}, DEFAULT_WEIGHTS);
+  }
+  function saveWeights(weights) {
+    var statusEl = document.getElementById("saveStatus");
+    try { window.localStorage.setItem("reentry-weights", JSON.stringify(weights)); statusEl.textContent = "Weights are saved in this browser and will be here next time you open this."; }
+    catch (e) { statusEl.textContent = "Couldn't save weights in this browser."; }
+  }
+  function setupWeights() {
+    var weights = loadWeights();
+    var ids = { adoption: "wAdoption", effect: "wEffect", evidence: "wEvidence", friction: "wFriction" };
+    var valIds = { adoption: "wAdoptionVal", effect: "wEffectVal", evidence: "wEvidenceVal", friction: "wFrictionVal" };
+    Object.keys(ids).forEach(function (key) {
+      var input = document.getElementById(ids[key]);
+      input.value = weights[key];
+      document.getElementById(valIds[key]).textContent = weights[key];
+      input.addEventListener("input", function () {
+        weights[key] = Number(input.value);
+        document.getElementById(valIds[key]).textContent = weights[key];
+        computeAndRenderScore(weights);
+        saveWeights(weights);
+      });
+    });
+    document.getElementById("saveStatus").textContent = "Weights are saved in this browser and will be here next time you open this.";
+    computeAndRenderScore(weights);
+  }
+  function setupTabs() {
+    var buttons = document.querySelectorAll(".tabbtn");
+    buttons.forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        buttons.forEach(function (b) { b.classList.remove("active"); });
+        btn.classList.add("active");
+        document.querySelectorAll(".tabpanel").forEach(function (p) { p.classList.remove("active"); });
+        document.getElementById("tab-" + btn.getAttribute("data-tab")).classList.add("active");
+      });
+    });
+  }
+  renderChart(); setupWeights(); setupTabs();
+})();
+</script>
+</body>
+</html>
